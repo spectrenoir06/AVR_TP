@@ -93,7 +93,7 @@ int	main(void) {
 		if (!ft_strcmp(user, input)) {
 			print_str("\r\n\tPass: ");
 			getInput(input, 1);
-			if (ft_strcmp(pass, input)) {
+			if (!ft_strcmp(pass, input)) {
 				print_str("\r\nWelcome ");
 				print_str(user);
 				for(;;) {
