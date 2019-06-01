@@ -25,85 +25,22 @@ uint8_t uart_rx(void) {
 	return UDR0; // Get and return received data from buffer                    20.11.1 UDRn
 }
 
-void put_str(const char* str, uint8_t size) {
+void put_str(char* str, uint8_t size) {
 	do
 		uart_tx(*str++);
 	while(--size);
 }
 
-uint8_t ft_strlen(const char *s) {
-	uint8_t c = 0;
-	while(*s++)
-		++c;
-	return c;
-}
-
-void print_str(const char* str) {
-	uint8_t len = ft_strlen(str);
-	put_str(str, len);
-}
-
-void getInput(char *str, uint8_t hide) {
-	char c;
-	char *ptr = str;
-
-	for(uint8_t i=0; i<255; i++) // clear input
-		str[i] = 0;
-
-	for(;;) {
-		c = uart_rx();
-		switch (c) {
-			case 0x7F: // del
-				if (ptr>str) {
-					*ptr = 0;
-					--ptr;
-					put_str("\b \b", 3);
-				}
-				break;
-			case '\r': // enter
-				return;
-			default:
-				if (ptr< str + 255) {
-					*ptr++ = c;
-					uart_tx(hide ? '*' : c);
-				}
-		}
-	}
-}
-
-int8_t ft_strcmp(const char* s1, const char* s2)
-{
-	while (*s1 != '\0' && (*s1++ == *s2++));
-	return (*(unsigned char *)--s1 - *(unsigned char *)--s2);
-}
-
-const char user[255] = "spectre";
-const char pass[255] = "secret";
-
 int	main(void) {
-	char input[255];
+	char c;
 
 	uart_init();
-	DDRB |= (1 << PIN5); // OUTPUT
 	for(;;) {
-		print_str("\r\nHello please login:\r\n");
-		print_str("\tUser: ");
-
-		getInput(input, 0);
-		if (!ft_strcmp(user, input)) {
-			print_str("\r\n\tPass: ");
-			getInput(input, 1);
-			if (ft_strcmp(pass, input)) {
-				print_str("\r\nWelcome ");
-				print_str(user);
-				for(;;) {
-					PORTB ^= (1 << PIN5);
-					_delay_ms(100);
-				}
-
-			} else
-				print_str("\r\nWrong password\r\n");
- 		} else
-			print_str("\r\nNo user found\r\n");
+		c = uart_rx();
+		if ( c >= 'A' && c <= 'Z' )
+			c += 'a' - 'A';
+		else if ( c >= 'a' && c <= 'z' )
+			c -= 'a' - 'A';
+		uart_tx(c);
 	}
 }
