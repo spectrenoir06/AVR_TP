@@ -1,10 +1,11 @@
+#include <avr/io.h>
+#include <util/delay.h>
+
 #define UART_BAUDRATE 115200
 
 // #define BAUD_PRESCALE ((F_CPU / 16 / UART_BAUDRATE) - 1) // Async normal     20.3.1
 #define BAUD_PRESCALE ((F_CPU / 8 / UART_BAUDRATE) - 1) // Async double speed   20.3.1
-
-#include <avr/io.h>
-#include <util/delay.h>
+#define MAX_INPUT 30
 
 void uart_init(void) {
 	UBRR0L = BAUD_PRESCALE; // Set baud rate                                    20.11.5 UBRRnL
@@ -47,7 +48,7 @@ void getInput(char *str, uint8_t hide) {
 	char c;
 	char *ptr = str;
 
-	for(uint8_t i=0; i<255; i++) // clear input
+	for(uint8_t i=0; i<MAX_INPUT; i++) // clear input
 		str[i] = 0;
 
 	for(;;) {
@@ -63,7 +64,7 @@ void getInput(char *str, uint8_t hide) {
 			case '\r': // enter
 				return;
 			default:
-				if (ptr< str + 255) {
+				if (ptr< str + MAX_INPUT) {
 					*ptr++ = c;
 					uart_tx(hide ? '*' : c);
 				}
@@ -77,11 +78,11 @@ int8_t ft_strcmp(const char* s1, const char* s2)
 	return (*(unsigned char *)--s1 - *(unsigned char *)--s2);
 }
 
-const char user[255] = "spectre";
-const char pass[255] = "secret";
+const char user[] = "spectre";
+const char pass[] = "secret";
 
 int	main(void) {
-	char input[255];
+	char input[MAX_INPUT];
 
 	uart_init();
 	DDRB |= (1 << PIN5); // OUTPUT
