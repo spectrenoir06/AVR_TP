@@ -11,7 +11,7 @@ all:
 	${OBJCOPY} -j .text -j .data -O ihex ${TARGET}.bin ${TARGET}.hex
 
 flash: all
-	avrdude -p ${MCU} -c arduino -P /dev/ttyACM0 -b 115200 -D -U flash:w:${TARGET}.hex:i
+	avrdude -p ${MCU} -c arduino -P /dev/ttyUSB0 -b 57600 -D -U flash:w:${TARGET}.hex:i
 
 clean:
 	rm -f *.bin *.hex
