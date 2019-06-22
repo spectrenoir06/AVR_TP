@@ -7,7 +7,7 @@
 #define BAUD_PRESCALE ((F_CPU / 8 / UART_BAUDRATE) - 1) // Async double speed   20.3.1
 #define MAX_INPUT 30
 
-void uart_init(void) {
+inline void uart_init(void) {
 	UBRR0L = BAUD_PRESCALE; // Set baud rate                                    20.11.5 UBRRnL
 	UBRR0H = BAUD_PRESCALE >> 8;
 
@@ -16,30 +16,30 @@ void uart_init(void) {
 	UCSR0C = (1<<UCSZ01) | (1<<UCSZ00); // 8-N-1                                20.11.4 UCSRnC
 }
 
-void uart_tx(unsigned char data) {
+inline void uart_tx(unsigned char data) {
 	while(!(UCSR0A & (1<<UDRE0))); // Wait for empty transmit buffer            20.11.2 UCSRnA
 	UDR0 = data; //Put data into buffer, sends the data                         20.11.1 UDRn
 }
 
-uint8_t uart_rx(void) {
+inline uint8_t uart_rx(void) {
 	while(!(UCSR0A & (1<<RXC0))); // Wait for data to be received               20.11.2 UCSRnA
 	return UDR0; // Get and return received data from buffer                    20.11.1 UDRn
 }
 
-void put_str(const char* str, uint8_t size) {
+inline void put_str(const char* str, uint8_t size) {
 	do
 		uart_tx(*str++);
 	while(--size);
 }
 
-uint8_t ft_strlen(const char *s) {
+inline uint8_t ft_strlen(const char *s) {
 	uint8_t c = 0;
 	while(*s++)
 		++c;
 	return c;
 }
 
-void print_str(const char* str) {
+inline void print_str(const char* str) {
 	uint8_t len = ft_strlen(str);
 	put_str(str, len);
 }
@@ -58,7 +58,7 @@ void getInput(char *str, uint8_t hide) {
 				if (ptr>str) {
 					*ptr = 0;
 					--ptr;
-					put_str("\b \b", 3);
+					put_str("\b \b", 3); // remove char from screen
 				}
 				break;
 			case '\r': // enter
@@ -72,7 +72,7 @@ void getInput(char *str, uint8_t hide) {
 	}
 }
 
-int8_t ft_strcmp(const char* s1, const char* s2)
+inline int8_t ft_strcmp(const char* s1, const char* s2)
 {
 	while (*s1 != '\0' && (*s1++ == *s2++));
 	return (*(unsigned char *)--s1 - *(unsigned char *)--s2);
@@ -87,24 +87,23 @@ int	main(void) {
 	uart_init();
 	DDRB |= (1 << PIN5); // OUTPUT
 	for(;;) {
-		print_str("\r\nHello please login:\r\n");
-		print_str("\tUser: ");
+		put_str("\r\nHello please login:\r\n", 23);
+		put_str("\tUser: ", 7);
 
 		getInput(input, 0);
 		if (!ft_strcmp(user, input)) {
-			print_str("\r\n\tPass: ");
+			put_str("\r\n\tPass: ", 9);
 			getInput(input, 1);
 			if (!ft_strcmp(pass, input)) {
-				print_str("\r\nWelcome ");
+				put_str("\r\nWelcome ", 10);
 				print_str(user);
 				for(;;) {
 					PORTB ^= (1 << PIN5);
 					_delay_ms(100);
 				}
-
 			} else
-				print_str("\r\nWrong password\r\n");
+				put_str("\r\nWrong password\r\n", 18);
  		} else
-			print_str("\r\nNo user found\r\n");
+			put_str("\r\nNo user found\r\n", 21);
 	}
 }
