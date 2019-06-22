@@ -26,7 +26,7 @@ inline uint8_t uart_rx(void) {
 	return UDR0; // Get and return received data from buffer                    20.11.1 UDRn
 }
 
-inline void put_str(const char* str, uint8_t size) {
+void put_str(const char* str, uint8_t size) {
 	do
 		uart_tx(*str++);
 	while(--size);
@@ -40,8 +40,13 @@ inline uint8_t ft_strlen(const char *s) {
 }
 
 inline void print_str(const char* str) {
-	uint8_t len = ft_strlen(str);
-	put_str(str, len);
+	put_str(str, ft_strlen(str));
+}
+
+inline int8_t ft_strcmp(const char* s1, const char* s2)
+{
+	while (*s1 != '\0' && (*s1++ == *s2++));
+	return (*(unsigned char *)--s1 - *(unsigned char *)--s2);
 }
 
 void getInput(char *str, uint8_t hide) {
@@ -64,18 +69,12 @@ void getInput(char *str, uint8_t hide) {
 			case '\r': // enter
 				return;
 			default:
-				if (ptr< str + MAX_INPUT) {
+				if (ptr < str + MAX_INPUT) {
 					*ptr++ = c;
 					uart_tx(hide ? '*' : c);
 				}
 		}
 	}
-}
-
-inline int8_t ft_strcmp(const char* s1, const char* s2)
-{
-	while (*s1 != '\0' && (*s1++ == *s2++));
-	return (*(unsigned char *)--s1 - *(unsigned char *)--s2);
 }
 
 const char user[] = "spectre";
